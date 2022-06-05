@@ -26,8 +26,8 @@ class manager_status(BaseModel):
     global today_str
 
     # INFER_SE: str = '0.0.0.0:8001'
-    FL_client: str = '0.0.0.0:8002'
-    FL_server_ST: str = '0.0.0.0:8000'
+    FL_client: str = '127.0.0.1:8002'
+    FL_server_ST: str = '10.152.183.18:8000'
     FL_server: str = '0.0.0.0:8080'  # '0.0.0.1:8080'
     # S3_filename: str = '../download_model/%s_model.h5'%today_str  # 다운로드된 모델이 저장될 위치#######################
     S3_bucket: str = 'fl-flower-model'
