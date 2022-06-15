@@ -143,10 +143,10 @@ async def health_check():
             #     await pull_model()
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
-            # logging.info('flclient learning')
-            # manager.FL_learning = True
+            logging.info('flclient learning')
+            manager.FL_learning = True
         elif (res.status_code != 200):
-            # manager.FL_client_online = False
+            manager.FL_client_online = False
             logging.error('FL_server_ST offline')
             # exit(0)
         else:
