@@ -143,6 +143,7 @@ async def health_check():
             #     await pull_model()
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
+            print('server_status: ', manager.FL_ready)
             logging.info('flclient learning')
             manager.FL_learning = True
         elif (res.status_code != 200):
