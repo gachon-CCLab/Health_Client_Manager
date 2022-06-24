@@ -64,9 +64,9 @@ def startup():
     # 전역변수값을 보고 상태를 유지하려고 합니다.
     # 이런식으로 짠 이유는 개발과정에서 각 구성요소의 상태가 불안정할수 있기 때문으로
     # manager가 일정주기로 상태를 확인하고 또는 명령에 대한 반환값을 가지고 정보를 갱신합니다
+    loop.create_task(check_flclient_online())
     loop.create_task(health_check())
     # loop.create_task(check_infer_online())
-    loop.create_task(check_flclient_online())
     # loop.create_task(infer_update())
     loop.create_task(start_training())
 
@@ -134,16 +134,18 @@ def async_dec(awaitable_func):
 @async_dec
 async def health_check():
     global manager
+    print('초기 FL_learning: ', manager.FL_learning)
+    print('초기 FL_client_online: ', manager.FL_client_online)
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
         # raise
         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
+        print('server 상태 get 후 server_status: ', manager.FL_ready)
         if (res.status_code == 200) and (res.json()['Server_Status']['FLSeReady']):
             # if res.json()['Server_Status']['GL_Model_V'] != manager.GL_Model_V:
             #     await pull_model()
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
-            print('server_status: ', manager.FL_ready)
             logging.info('flclient learning')
             manager.FL_learning = True
         elif (res.status_code != 200):
