@@ -143,7 +143,7 @@ def health_check():
         # loop = asyncio.get_event_loop()
         # # raise
         # res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
-        res = requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info')
+        res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
 
         print('server 상태 get 후 server_status: ', manager.FL_ready)
         if (res.status_code == 200) and (res.json()['Server_Status']['FLSeReady']):
@@ -189,7 +189,7 @@ def check_flclient_online():
         logging.info('FL_client offline')
         # loop = asyncio.get_event_loop()
         # res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
-        res = requests.get, ('http://' + manager.FL_client + '/online')
+        res = requests.get('http://' + manager.FL_client + '/online')
 
         if (res.status_code == 200) and (res.json()['FL_client_online']):
             manager.FL_client_online = res.json()['FL_client_online']
@@ -229,7 +229,7 @@ def start_training():
     if (manager.FL_client_online == True) and (manager.FL_learning == False) and (manager.FL_ready == True):
         logging.info('start training')
         # loop = asyncio.get_event_loop()
-        res = requests.get, ('http://' + manager.FL_client + '/start/'+manager.FL_server)
+        res = requests.get('http://' + manager.FL_client + '/start/'+manager.FL_server)
         if (res.status_code == 200) and (res.json()['FL_client_start']):
             manager.FL_learning = True
             logging.info('start_train')
