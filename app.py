@@ -49,15 +49,17 @@ class manager_status(BaseModel):
 
 manager = manager_status()
 
+async def main():
+    await check_flclient_online()
+    await health_check()
+    await start_training()
 
 @app.on_event("startup")
 def startup():
     ##### S0 #####
     
     get_server_info()
-    check_flclient_online()
-    health_check()
-    start_training()
+    asyncio.run(main())
 
     # create_task를 해야 여러 코루틴을 동시에 실행
     # asyncio.create_task(pull_model())
@@ -129,14 +131,14 @@ def async_dec(awaitable_func):
             except Exception as e:
                 # logging.info('[E]' , awaitable_func.__name__, e)
                 logging.error('[E]' + str(awaitable_func.__name__) + str(e))
-            time.sleep(1)
-            # await asyncio.sleep(1)
+            # time.sleep(1)
+            await asyncio.sleep(1)
 
     return keeping_state
 
 
 @async_dec
-def health_check():
+async def health_check():
     global manager
     print('초기 FL_learning: ', manager.FL_learning)
     print('초기 FL_client_online: ', manager.FL_client_online)
@@ -184,7 +186,7 @@ def health_check():
 
 
 @async_dec
-def check_flclient_online():
+async def check_flclient_online():
     global manager
     if (manager.FL_client_online == False):
         logging.info('FL_client offline')
@@ -225,7 +227,7 @@ def check_flclient_online():
 
 
 @async_dec
-def start_training():
+async def start_training():
     global manager
     if (manager.FL_client_online == True) and (manager.FL_learning == False) and (manager.FL_ready == True):
         logging.info('start training')
