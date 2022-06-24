@@ -133,9 +133,9 @@ def async_dec(awaitable_func):
 @async_dec
 async def health_check():
     global manager
-    logging.info('초기 health_check() FL_learning: ', manager.FL_learning)
-    logging.info('초기 health_check() FL_client_online: ', manager.FL_client_online)
-    logging.info('초기 health_check() FL_ready: ', manager.FL_ready)
+    logging.debug('초기 health_check() FL_learning: ', manager.FL_learning)
+    logging.debug('초기 health_check() FL_client_online: ', manager.FL_client_online)
+    logging.debug('초기 health_check() FL_ready: ', manager.FL_ready)
 
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
@@ -146,7 +146,7 @@ async def health_check():
             #     await pull_model()
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
-            logging.info('server 상태 get 후 server_status: ', manager.FL_ready)
+            logging.debug('server 상태 get 후 server_status: ', manager.FL_ready)
             logging.info('flclient learning')
             # manager.FL_learning = True
         elif (res.status_code != 200):
@@ -236,7 +236,7 @@ async def check_flclient_online():
 @async_dec
 async def start_training():
     global manager
-    logging.info('start_training() FL Server Status: ', manager.FL_ready)
+    logging.debug('start_training() FL Server Status: ', manager.FL_ready)
     if (manager.FL_client_online == True) and (manager.FL_learning == False) and (manager.FL_ready == True):
         logging.info('start training')
         loop = asyncio.get_event_loop()
