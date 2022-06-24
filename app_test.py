@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from functools import wraps
 
-import requests
+import requests, time
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)8.8s] %(message)s",
                     handlers=[logging.StreamHandler()])
@@ -49,15 +49,17 @@ class manager_status(BaseModel):
 
 manager = manager_status()
 
+async def main():
+    await check_flclient_online()
+    await health_check()
+    await start_training()
 
 @app.on_event("startup")
 def startup():
     ##### S0 #####
     
     get_server_info()
-    check_flclient_online()
-    health_check()
-    start_training()
+    asyncio.run(main())
 
     # create_task를 해야 여러 코루틴을 동시에 실행
     # asyncio.create_task(pull_model())
@@ -129,6 +131,7 @@ def async_dec(awaitable_func):
             except Exception as e:
                 # logging.info('[E]' , awaitable_func.__name__, e)
                 logging.error('[E]' + str(awaitable_func.__name__) + str(e))
+            # time.sleep(1)
             await asyncio.sleep(1)
 
     return keeping_state
@@ -140,9 +143,11 @@ async def health_check():
     print('초기 FL_learning: ', manager.FL_learning)
     print('초기 FL_client_online: ', manager.FL_client_online)
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
-        loop = asyncio.get_event_loop()
-        # raise
-        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
+        # loop = asyncio.get_event_loop()
+        # # raise
+        # res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
+        res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
+
         print('server 상태 get 후 server_status: ', manager.FL_ready)
         if (res.status_code == 200) and (res.json()['Server_Status']['FLSeReady']):
             # if res.json()['Server_Status']['GL_Model_V'] != manager.GL_Model_V:
@@ -185,8 +190,10 @@ async def check_flclient_online():
     global manager
     if (manager.FL_client_online == False):
         logging.info('FL_client offline')
-        loop = asyncio.get_event_loop()
-        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
+        # loop = asyncio.get_event_loop()
+        # res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
+        res = requests.get('http://' + manager.FL_client + '/online')
+
         if (res.status_code == 200) and (res.json()['FL_client_online']):
             manager.FL_client_online = res.json()['FL_client_online']
             manager.FL_learning = res.json()['FL_client_start']
@@ -224,8 +231,8 @@ async def start_training():
     global manager
     if (manager.FL_client_online == True) and (manager.FL_learning == False) and (manager.FL_ready == True):
         logging.info('start training')
-        loop = asyncio.get_event_loop()
-        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/start/'+manager.FL_server))
+        # loop = asyncio.get_event_loop()
+        res = requests.get('http://' + manager.FL_client + '/start/'+manager.FL_server)
         if (res.status_code == 200) and (res.json()['FL_client_start']):
             manager.FL_learning = True
             logging.info('start_train')
