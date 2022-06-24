@@ -135,6 +135,8 @@ async def health_check():
     global manager
     logging.info('초기 health_check() FL_learning: ', manager.FL_learning)
     logging.info('초기 health_check() FL_client_online: ', manager.FL_client_online)
+    logging.info('초기 health_check() FL_ready: ', manager.FL_ready)
+
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
         # raise
