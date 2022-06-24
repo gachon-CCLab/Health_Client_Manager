@@ -118,23 +118,23 @@ def flclient_out():
 #     manager.infer_updating = False
 #     return manager
 
-def async_dec(awaitable_func):
-    async def keeping_state():
-        while True:
-            try:
-                logging.debug(str(awaitable_func.__name__) + '함수 시작')
-                # print(awaitable_func.__name__, '함수 시작')
-                await awaitable_func()
-                logging.debug(str(awaitable_func.__name__) + '_함수 종료')
-            except Exception as e:
-                # logging.info('[E]' , awaitable_func.__name__, e)
-                logging.error('[E]' + str(awaitable_func.__name__) + str(e))
-            await asyncio.sleep(1)
+# def async_dec(awaitable_func):
+#     async def keeping_state():
+#         while True:
+#             try:
+#                 logging.debug(str(awaitable_func.__name__) + '함수 시작')
+#                 # print(awaitable_func.__name__, '함수 시작')
+#                 await awaitable_func()
+#                 logging.debug(str(awaitable_func.__name__) + '_함수 종료')
+#             except Exception as e:
+#                 # logging.info('[E]' , awaitable_func.__name__, e)
+#                 logging.error('[E]' + str(awaitable_func.__name__) + str(e))
+#             await asyncio.sleep(1)
 
-    return keeping_state
+#     return keeping_state
 
 
-@async_dec
+# @async_dec
 def health_check():
     global manager
     print('초기 FL_learning: ', manager.FL_learning)
@@ -182,7 +182,7 @@ def health_check():
 #         await asyncio.sleep(12)
 
 
-@async_dec
+# @async_dec
 def check_flclient_online():
     global manager
     if (manager.FL_client_online == False):
@@ -223,7 +223,7 @@ def check_flclient_online():
 #         await asyncio.sleep(13)
 
 
-@async_dec
+# @async_dec
 def start_training():
     global manager
     if (manager.FL_client_online == True) and (manager.FL_learning == False) and (manager.FL_ready == True):
