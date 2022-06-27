@@ -276,12 +276,10 @@ async def start_training():
 
             # FL Server/Client 학습 종료까지 대기
             # await asyncio.sleep(14)
-            
-            # 다시 client online/learning check
-            # await check_flclient_online()
 
-            await asyncio.sleep(14)
-            pass
+            await asyncio.sleep(60)
+            # 다시 client online/learning check
+            await check_flclient_online()
 
         elif (res.status_code != 200):
             manager.FL_client_online = False
@@ -290,6 +288,8 @@ async def start_training():
             pass
     else:
         # await asyncio.sleep(11)
+        # 다시 client online/learning check
+        await check_flclient_online()
         pass
 
     
