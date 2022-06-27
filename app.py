@@ -159,6 +159,7 @@ async def health_check():
 
             if (manager.FL_learning == False):
                 # client fl start check 및 실행
+                await asyncio.sleep(30) # FL 서버 동작까지 대기
                 await start_training()  
 
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
