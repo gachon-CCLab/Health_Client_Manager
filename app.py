@@ -154,7 +154,7 @@ async def health_check():
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
-            logging.info('flclient learning')
+            # logging.info('flclient learning')
             # manager.FL_learning = True
         elif (res.status_code != 200):
             manager.FL_client_online = False
@@ -190,15 +190,18 @@ async def health_check():
 async def check_flclient_online():
     global manager
     # logging.info('FL_client offline')
-    loop = asyncio.get_event_loop()
-    res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
-    if (res.status_code == 200) and (res.json()['FL_client_online']):
-        manager.FL_client_online = res.json()['FL_client_online']
-        manager.FL_learning = res.json()['FL_client_start']
-        manager.FL_client_num = res.json()['FL_client']
-        logging.info('FL_client online')
+    if (manager.FL_ready==True) and (manager.FL_learning==False):
+        loop = asyncio.get_event_loop()
+        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
+        if (res.status_code == 200) and (res.json()['FL_client_online']):
+            manager.FL_client_online = res.json()['FL_client_online']
+            manager.FL_learning = res.json()['FL_client_start']
+            manager.FL_client_num = res.json()['FL_client']
+            logging.info('FL_client online')
+        else:
+            logging.info('FL_client offline')
+            pass
     else:
-        logging.info('FL_client offline')
         pass
 
     return manager
@@ -254,8 +257,8 @@ async def start_training():
         loop = asyncio.get_event_loop()
         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/start/'+manager.FL_server))
         if (res.status_code == 200) and (res.json()['FL_client_start']):
+            logging.info('flclient learning')
             manager.FL_learning = True
-            logging.info('start_train')
         elif (res.status_code != 200):
             manager.FL_client_online = False
             logging.info('flclient offline')
