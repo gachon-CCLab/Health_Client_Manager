@@ -275,6 +275,13 @@ async def start_training():
         if (res.status_code == 200) and (res.json()['FL_client_start']):
             logging.info('flclient learning')
             manager.FL_learning = True
+
+            # FL Server/Client 학습 종료까지 대기
+            await asyncio.sleep(14)
+            
+            # 다시 client online/learning check
+            await check_flclient_online()
+
         elif (res.status_code != 200):
             manager.FL_client_online = False
             logging.info('flclient offline')
