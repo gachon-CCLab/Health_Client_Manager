@@ -190,19 +190,20 @@ async def health_check():
 async def check_flclient_online():
     global manager
     # logging.info('FL_client offline')
-    if (manager.FL_ready==True) and (manager.FL_learning==False):
-        loop = asyncio.get_event_loop()
-        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
-        if (res.status_code == 200) and (res.json()['FL_client_online']):
-            manager.FL_client_online = res.json()['FL_client_online']
-            manager.FL_learning = res.json()['FL_client_start']
-            manager.FL_client_num = res.json()['FL_client']
-            logging.info('FL_client online')
-        else:
-            logging.info('FL_client offline')
-            pass
+    # if (manager.FL_ready==True) and (manager.FL_learning==False):
+    loop = asyncio.get_event_loop()
+    res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
+    if (res.status_code == 200) and (res.json()['FL_client_online']):
+        manager.FL_client_online = res.json()['FL_client_online']
+        manager.FL_learning = res.json()['FL_client_start']
+        manager.FL_client_num = res.json()['FL_client']
+        logging.info('FL_client online')
     else:
+        logging.info('FL_client offline')
         pass
+    # else:
+    #     pass
+    asyncio.sleep(12)
 
     return manager
 
@@ -265,7 +266,7 @@ async def start_training():
         else:
             pass
     else:
-        # await asyncio.sleep(9)
+        await asyncio.sleep(13)
         pass
 
     return manager
