@@ -163,7 +163,7 @@ async def health_check():
         else:
             pass
     else:
-        # await asyncio.sleep(8)
+        await asyncio.sleep(8)
         pass
 
     return manager
@@ -203,7 +203,7 @@ async def check_flclient_online():
         pass
     # else:
     #     pass
-    asyncio.sleep(12)
+    asyncio.sleep(10)
 
     return manager
 
@@ -257,6 +257,7 @@ async def start_training():
         logging.info('start training')
         loop = asyncio.get_event_loop()
         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/start/'+manager.FL_server))
+        logging.info(f'client_start code: {res.status_code}')
         if (res.status_code == 200) and (res.json()['FL_client_start']):
             logging.info('flclient learning')
             manager.FL_learning = True
@@ -266,7 +267,7 @@ async def start_training():
         else:
             pass
     else:
-        await asyncio.sleep(13)
+        await asyncio.sleep(11)
         pass
 
     return manager
