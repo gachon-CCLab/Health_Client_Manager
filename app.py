@@ -157,7 +157,7 @@ async def health_check():
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
 
-            if (manager.learning == False):
+            if (manager.FL_learning == False):
                 # client fl start check 및 실행
                 await start_training()  
 
