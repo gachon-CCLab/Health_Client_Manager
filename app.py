@@ -65,10 +65,10 @@ def startup():
     # 이런식으로 짠 이유는 개발과정에서 각 구성요소의 상태가 불안정할수 있기 때문으로
     # manager가 일정주기로 상태를 확인하고 또는 명령에 대한 반환값을 가지고 정보를 갱신합니다
     loop.create_task(check_flclient_online())
-    loop.create_task(health_check())
-    # loop.create_task(check_infer_online())
-    # loop.create_task(infer_update())
-    loop.create_task(start_training())
+    # loop.create_task(health_check())
+    # # loop.create_task(check_infer_online())
+    # # loop.create_task(infer_update())
+    # loop.create_task(start_training())
 
     # 코루틴이 여러개일 경우, asyncio.gather을 먼저 이용 (순서대로 스케쥴링 된다.)
     # loop.run_until_complete(asyncio.gather(health_check(), check_flclient_online(), start_training()))
@@ -158,7 +158,7 @@ async def health_check():
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
 
             # client fl start check 및 실행
-            # await start_training()  
+            await start_training()  
 
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
             # logging.info('flclient learning')
@@ -172,7 +172,7 @@ async def health_check():
     else:
         # await asyncio.sleep(8)
         pass
-    await asyncio.sleep(12)
+    # await asyncio.sleep(12)
     return manager
 
 # @async_dec
@@ -207,14 +207,14 @@ async def check_flclient_online():
         logging.info('FL_client online')
 
         # FL Server 동작 check
-        # await health_check()
+        await health_check()
 
     else:
         logging.info('FL_client offline')
         pass
     # else:
     #     pass
-    await asyncio.sleep(10)
+    # await asyncio.sleep(10)
 
     return manager
 
@@ -279,6 +279,9 @@ async def start_training():
             # 다시 client online/learning check
             # await check_flclient_online()
 
+            await asyncio.sleep(14)
+            pass
+
         elif (res.status_code != 200):
             manager.FL_client_online = False
             logging.info('flclient offline')
@@ -288,7 +291,7 @@ async def start_training():
         # await asyncio.sleep(11)
         pass
 
-    await asyncio.sleep(14)
+    
     
     return manager
 
