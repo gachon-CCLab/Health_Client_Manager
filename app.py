@@ -54,6 +54,7 @@ manager = manager_status()
 def startup():
     ##### S0 #####
     
+    # get_server_info()
 
     # create_task를 해야 여러 코루틴을 동시에 실행
     # asyncio.create_task(pull_model())
@@ -63,6 +64,7 @@ def startup():
     # 전역변수값을 보고 상태를 유지하려고 합니다.
     # 이런식으로 짠 이유는 개발과정에서 각 구성요소의 상태가 불안정할수 있기 때문으로
     # manager가 일정주기로 상태를 확인하고 또는 명령에 대한 반환값을 가지고 정보를 갱신합니다
+    loop.create_task(get_server_info())
     loop.create_task(check_flclient_online())
     loop.create_task(health_check())
     # loop.create_task(check_infer_online())
@@ -136,6 +138,10 @@ async def health_check():
     logging.info(f'초기 health_check() FL_learning: {manager.FL_learning}')
     logging.info(f'초기 health_check() FL_client_online: {manager.FL_client_online}')
     logging.info(f'초기 health_check() FL_ready: {manager.FL_ready}')
+    
+    # FL Server Status가 False면 당연히 FL_learning도 False
+    if manager.FL_ready == False:
+        manager.FL_learning = False
 
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
@@ -158,7 +164,8 @@ async def health_check():
     else:
         # await asyncio.sleep(8)
         pass
-
+    
+    return manager
 
 # @async_dec
 # async def check_infer_online():
@@ -193,6 +200,7 @@ async def check_flclient_online():
         logging.info('FL_client offline')
         pass
 
+    return manager
 
 # @async_dec
 # async def check_flclient_online():
@@ -256,19 +264,38 @@ async def start_training():
         # await asyncio.sleep(9)
         pass
 
+    return manager
 
-def get_server_info():
+
+@async_dec 
+async def get_server_info():
     global manager
     try:
-        res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
-        # print(res.json())
+        logging.info('get_server_info')
+        logging.info(f'get_server_info() FL_ready {manager.FL_ready}')
+        loop = asyncio.get_event_loop()
+        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
         manager.S3_key = res.json()['Server_Status']['S3_key']
         manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
         manager.s3_ready = True
         manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
+        manager.FL_ready = res.json()['Server_Status']['FLSeReady']
     except Exception as e:
         raise e
     return manager
+
+# def get_server_info():
+#     global manager
+#     try:
+#         res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
+#         # print(res.json())
+#         manager.S3_key = res.json()['Server_Status']['S3_key']
+#         manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
+#         manager.s3_ready = True
+#         manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
+#     except Exception as e:
+#         raise e
+#     return manager
 
 
 # async def pull_model():
