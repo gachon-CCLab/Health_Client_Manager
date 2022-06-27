@@ -141,6 +141,7 @@ async def health_check():
     
     # FL Server Status가 False면 당연히 FL_learning도 False
     if manager.FL_ready == False:
+        logging.info(f'health_check() FL_ready = False 상태')
         manager.FL_learning = False
 
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
@@ -164,7 +165,7 @@ async def health_check():
     else:
         # await asyncio.sleep(8)
         pass
-    
+
     return manager
 
 # @async_dec
