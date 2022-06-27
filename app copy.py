@@ -54,31 +54,22 @@ manager = manager_status()
 def startup():
     ##### S0 #####
     
-    while True:
-        try:
-            get_server_info()
-            health_check()
-            check_flclient_online()
-            start_training()
-        except Exception as e:
-            logging.error(f"error: {e}")
+    # get_server_info()
 
-    # # get_server_info()
-
-    # # create_task를 해야 여러 코루틴을 동시에 실행
-    # # asyncio.create_task(pull_model())
-    # ##### S1 #####
-    # loop = asyncio.get_event_loop()
-    # loop.set_debug(True)
-    # # 전역변수값을 보고 상태를 유지하려고 합니다.
-    # # 이런식으로 짠 이유는 개발과정에서 각 구성요소의 상태가 불안정할수 있기 때문으로
-    # # manager가 일정주기로 상태를 확인하고 또는 명령에 대한 반환값을 가지고 정보를 갱신합니다
-    # loop.create_task(get_server_info())
-    # loop.create_task(check_flclient_online())
-    # loop.create_task(health_check())
-    # # loop.create_task(check_infer_online())
-    # # loop.create_task(infer_update())
-    # loop.create_task(start_training())
+    # create_task를 해야 여러 코루틴을 동시에 실행
+    # asyncio.create_task(pull_model())
+    ##### S1 #####
+    loop = asyncio.get_event_loop()
+    loop.set_debug(True)
+    # 전역변수값을 보고 상태를 유지하려고 합니다.
+    # 이런식으로 짠 이유는 개발과정에서 각 구성요소의 상태가 불안정할수 있기 때문으로
+    # manager가 일정주기로 상태를 확인하고 또는 명령에 대한 반환값을 가지고 정보를 갱신합니다
+    loop.create_task(get_server_info())
+    loop.create_task(check_flclient_online())
+    loop.create_task(health_check())
+    # loop.create_task(check_infer_online())
+    # loop.create_task(infer_update())
+    loop.create_task(start_training())
 
 
 @app.get("/")
@@ -104,7 +95,7 @@ def fail_train():
     #manager.infer_ready = False
     manager.FL_learning = False
     manager.FL_ready = False
-    health_check()
+    asyncio.run(health_check()) 
     return manager
 
 
@@ -125,23 +116,24 @@ def flclient_out():
 #     manager.infer_updating = False
 #     return manager
 
-# def async_dec(awaitable_func):
-#     async def keeping_state():
-#         while True:
-#             try:
-#                 logging.debug(str(awaitable_func.__name__) + '함수 시작')
-#                 # print(awaitable_func.__name__, '함수 시작')
-#                 await awaitable_func()
-#                 logging.debug(str(awaitable_func.__name__) + '_함수 종료')
-#             except Exception as e:
-#                 # logging.info('[E]' , awaitable_func.__name__, e)
-#                 logging.error('[E]' + str(awaitable_func.__name__) + str(e))
-#             await asyncio.sleep(1)
+def async_dec(awaitable_func):
+    async def keeping_state():
+        while True:
+            try:
+                logging.debug(str(awaitable_func.__name__) + '함수 시작')
+                # print(awaitable_func.__name__, '함수 시작')
+                await awaitable_func()
+                logging.debug(str(awaitable_func.__name__) + '_함수 종료')
+            except Exception as e:
+                # logging.info('[E]' , awaitable_func.__name__, e)
+                logging.error('[E]' + str(awaitable_func.__name__) + str(e))
+            await asyncio.sleep(1)
 
-#     return keeping_state
+    return keeping_state
 
 
-def health_check():
+@async_dec
+async def health_check():
     global manager
     logging.info(f'초기 health_check() FL_learning: {manager.FL_learning}')
     logging.info(f'초기 health_check() FL_client_online: {manager.FL_client_online}')
@@ -153,8 +145,9 @@ def health_check():
         manager.FL_learning = False
 
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
-        
-        res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
+        loop = asyncio.get_event_loop()
+        # raise
+        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
         if (res.status_code == 200) and (res.json()['Server_Status']['FLSeReady']):
             # if res.json()['Server_Status']['GL_Model_V'] != manager.GL_Model_V:
             #     await pull_model()
@@ -170,7 +163,7 @@ def health_check():
         else:
             pass
     else:
-        logging.info('health_check() Pass')
+        await asyncio.sleep(8)
         pass
 
     return manager
@@ -193,25 +186,24 @@ def health_check():
 #         await asyncio.sleep(12)
 
 
-def check_flclient_online():
+@async_dec
+async def check_flclient_online():
     global manager
-    if manager.FL_client_online == False:
-        res = requests.get('http://' + manager.FL_client + '/online')
-        if (res.status_code == 200) and (res.json()['FL_client_online']):
-            manager.FL_client_online = res.json()['FL_client_online']
-            if manager.FL_ready == True:
-                manager.FL_learning = res.json()['FL_client_start']
-                manager.FL_client_num = res.json()['FL_client']
-                logging.info('FL_client/server online')
-            else:
-                logging.info('FL_server offline')
-                pass
-        else:
-            logging.info('FL_client offline')
-            logging.info('check_flclient_online() Pass')
-            pass
+    # logging.info('FL_client offline')
+    # if (manager.FL_ready==True) and (manager.FL_learning==False):
+    loop = asyncio.get_event_loop()
+    res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
+    if (res.status_code == 200) and (res.json()['FL_client_online']):
+        manager.FL_client_online = res.json()['FL_client_online']
+        manager.FL_learning = res.json()['FL_client_start']
+        manager.FL_client_num = res.json()['FL_client']
+        logging.info('FL_client online')
+    else:
+        logging.info('FL_client offline')
+        pass
     # else:
     #     pass
+    asyncio.sleep(10)
 
     return manager
 
@@ -254,7 +246,8 @@ def check_flclient_online():
 #         await asyncio.sleep(13)
 
 
-def start_training():
+@async_dec
+async def start_training():
     global manager
     logging.info(f'start_training() FL Client Online: {manager.FL_client_online}')
     logging.info(f'start_training() FL Client Learning: {manager.FL_learning}')
@@ -262,7 +255,8 @@ def start_training():
 
     if (manager.FL_client_online == True) and (manager.FL_learning == False) and (manager.FL_ready == True):
         logging.info('start training')
-        res = requests.get('http://' + manager.FL_client + '/start/'+manager.FL_server)
+        loop = asyncio.get_event_loop()
+        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/start/'+manager.FL_server))
         logging.info(f'client_start code: {res.status_code}')
         if (res.status_code == 200) and (res.json()['FL_client_start']):
             logging.info('flclient learning')
@@ -273,19 +267,20 @@ def start_training():
         else:
             pass
     else:
-        logging.info('start_training() Pass')
+        await asyncio.sleep(11)
         pass
 
     return manager
 
 
-def get_server_info():
+@async_dec 
+async def get_server_info():
     global manager
     try:
         logging.info('get_server_info')
         logging.info(f'get_server_info() FL_ready {manager.FL_ready}')
-        
-        res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
+        loop = asyncio.get_event_loop()
+        res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
         manager.S3_key = res.json()['Server_Status']['S3_key']
         manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
         manager.s3_ready = True
