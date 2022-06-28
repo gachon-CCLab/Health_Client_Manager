@@ -170,30 +170,13 @@ async def health_check():
             logging.error('FL_server_ST offline')
             # exit(0)
         else:
+            await check_flclient_online()
             pass
     else:
         # await asyncio.sleep(8)
         pass
     # await asyncio.sleep(12)
     return manager
-
-# @async_dec
-# async def check_infer_online():
-#     global manager
-#     if (manager.infer_running == False) and (manager.infer_ready == True):
-#         logging.info('infer offline')
-#         loop = asyncio.get_event_loop()
-#         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.INFER_SE + '/online'))
-#         if (res.status_code == 200) and (res.json()['running']):
-#             manager.infer_online = res.json()['infer_online']
-#             manager.infer_running = res.json()['running']
-#             manager.infer_ready = False  # infer update 필요없음
-#             logging.info('infer online')
-#         else:
-#             pass
-#     else:
-#         await asyncio.sleep(12)
-
 
 @async_dec
 async def check_flclient_online():
@@ -219,45 +202,6 @@ async def check_flclient_online():
     # await asyncio.sleep(10)
 
     return manager
-
-# @async_dec
-# async def check_flclient_online():
-#     global manager
-#     if (manager.FL_client_online == False):
-#         logging.info('FL_client offline')
-#         loop = asyncio.get_event_loop()
-#         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
-#         if (res.status_code == 200) and (res.json()['FL_client_online']):
-#             manager.FL_client_online = res.json()['FL_client_online']
-#             manager.FL_learning = res.json()['FL_client_start']
-#             manager.FL_client_num = res.json()['FL_client']
-#             logging.info('FL_client online')
-#         else:
-#             logging.info('FL_client offline')
-#             pass
-#     else:
-#         pass
-
-
-# @async_dec
-# async def infer_update():
-#     global manager
-#     if (manager.infer_ready == True) and (manager.infer_running == True) and (manager.infer_online == True):
-#         logging.info('Start infer_update')
-#         loop = asyncio.get_event_loop()
-#         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.INFER_SE + '/update'))
-#         if (res.status_code == 200) and (res.json()['updating']):
-#             logging.info('infer_updated')
-#             manager.infer_ready = False
-#         elif (res.status_code != 200):
-#             manager.infer_online = False
-#             manager.infer_running = False
-#             logging.info('infer_offline')
-#         else:
-#             pass
-#     else:
-#         await asyncio.sleep(13)
-
 
 @async_dec
 async def start_training():
