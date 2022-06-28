@@ -170,7 +170,7 @@ async def health_check():
             logging.error('FL_server_ST offline')
             # exit(0)
         else:
-            await check_flclient_online()
+            # await check_flclient_online()
             pass
     else:
         # await asyncio.sleep(8)
