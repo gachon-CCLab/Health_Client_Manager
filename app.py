@@ -94,7 +94,7 @@ def fin_train():
 @app.put('/training')
 def fl_client_learning(cl_ma = manager_status):
     global manager
-    manager = manager_status
+    manager = cl_ma
     return manager
 
 @app.get("/trainFail")
@@ -229,9 +229,12 @@ async def start_training():
             logging.info('flclient learning')
             manager.FL_learning = True
 
-            # Fl client 실행 준비 완료
-            if manager.FL_learning_ready == False:
+            # Fl client 실행 오류
+            if manager.FL_learning_complete == False:
                 manager.FL_learning = False
+                logging.info('FL 실행 오류')
+            else:
+                logging.info('FL 실행 완료')
                 
             # FL Server/Client 학습 종료까지 대기
             # await asyncio.sleep(14)
@@ -265,7 +268,7 @@ def get_server_info():
         manager.S3_key = res.json()['Server_Status']['S3_key']
         manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
         manager.s3_ready = True
-        manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
+        # manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
         # manager.FL_ready = res.json()['Server_Status']['FLSeReady']
     except Exception as e:
         raise e
