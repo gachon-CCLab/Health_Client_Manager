@@ -40,6 +40,7 @@ class manager_status(BaseModel):
 
     FL_client_online: bool = False  # flower client online?
     FL_learning: bool = False  # flower client 학습중
+    FL_learning_ready: bool = False # flower client 학습 준비 상태
 
     # infer_online: bool = False  # infer online?
     # infer_running: bool = False  # inference server 작동중
@@ -90,6 +91,11 @@ def fin_train():
     # manager.GL_Model_V += 1
     return manager
 
+@app.put('/training')
+def fl_client_learning(cl_ma = manager_status):
+    global manager
+    manager = manager_status
+    return manager
 
 @app.get("/trainFail")
 def fail_train():
@@ -220,8 +226,11 @@ async def start_training():
         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/start/'+manager.FL_server))
         logging.info(f'client_start code: {res.status_code}')
         if (res.status_code == 200) and (res.json()['FL_client_start']):
-            logging.info('flclient learning')
-            manager.FL_learning = True
+            
+            # Fl client 실행 준비 완료
+            if manager.FL_learning_ready == True:
+                logging.info('flclient learning')
+                manager.FL_learning = True
 
             # FL Server/Client 학습 종료까지 대기
             # await asyncio.sleep(14)
