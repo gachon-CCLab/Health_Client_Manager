@@ -55,7 +55,7 @@ manager = manager_status()
 def startup():
     ##### S0 #####
     
-    get_server_info()
+    # get_server_info()
 
     # create_task를 해야 여러 코루틴을 동시에 실행
     # asyncio.create_task(pull_model())
@@ -259,20 +259,20 @@ async def start_training():
     return manager
 
 
-def get_server_info():
-    global manager
-    try:
-        logging.info('get_server_info')
-        logging.info(f'get_server_info() FL_ready: {manager.FL_ready}')
-        res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
-        manager.S3_key = res.json()['Server_Status']['S3_key']
-        manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
-        manager.s3_ready = True
-        # manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
-        # manager.FL_ready = res.json()['Server_Status']['FLSeReady']
-    except Exception as e:
-        raise e
-    return manager
+# def get_server_info():
+#     global manager
+#     try:
+#         logging.info('get_server_info')
+#         logging.info(f'get_server_info() FL_ready: {manager.FL_ready}')
+#         res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
+#         manager.S3_key = res.json()['Server_Status']['S3_key']
+#         manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
+#         manager.s3_ready = True
+#         # manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
+#         # manager.FL_ready = res.json()['Server_Status']['FLSeReady']
+#     except Exception as e:
+#         raise e
+#     return manager
 
 # def get_server_info():
 #     global manager
