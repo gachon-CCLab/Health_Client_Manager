@@ -88,7 +88,7 @@ def fin_train():
     # manager.infer_ready = True
     manager.FL_learning = False
     manager.FL_ready = False
-    # manager.GL_Model_V += 1
+    manager.GL_Model_V += 1
     return manager
 
 @app.put('/training')
@@ -169,9 +169,10 @@ async def health_check():
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
             
             if (manager.FL_learning == False):
+                await asyncio.sleep(40) # FL 서버 동작까지 대기
+
                 # client fl start check 및 실행
                 await start_training()  
-                await asyncio.sleep(40) # FL 서버 동작까지 대기
             
             # logging.info('flclient learning')
             # manager.FL_learning = True
