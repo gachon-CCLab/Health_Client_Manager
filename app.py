@@ -166,13 +166,13 @@ async def health_check():
             #     await pull_model()
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
-
+            logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
+            
             if (manager.FL_learning == False):
                 # client fl start check 및 실행
                 await start_training()  
                 await asyncio.sleep(40) # FL 서버 동작까지 대기
-
-            logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
+            
             # logging.info('flclient learning')
             # manager.FL_learning = True
         elif (res.status_code != 200):
@@ -230,16 +230,16 @@ async def start_training():
             manager.FL_learning = True
 
             # Fl client 실행 오류
-            if manager.FL_learning_complete == False:
-                manager.FL_learning = False
-                logging.info('FL 실행 오류')
-            else:
-                logging.info('FL 실행 완료')
+            # if manager.FL_learning_complete == False:
+            #     logging.info('FL 실행 오류')
+            # else:
+            #     manager.FL_learning = False
+            #     logging.info('FL 실행 완료')
                 
             # FL Server/Client 학습 종료까지 대기
             # await asyncio.sleep(14)
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(20)
             # 다시 client online/learning check
             await check_flclient_online()
 
