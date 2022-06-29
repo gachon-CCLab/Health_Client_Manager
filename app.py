@@ -10,12 +10,13 @@ from datetime import datetime, timedelta
 
 from functools import wraps
 
-import requests
+import requests, sys
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)8.8s] %(message)s",
                     handlers=[logging.StreamHandler()])
 logger = logging.getLogger(__name__)
 app = FastAPI()
+
 
  # 날짜를 폴더로 설정
 global today_str
@@ -162,6 +163,7 @@ async def health_check():
         await asyncio.sleep(90)
         logging.info('90초 동안 모든 상태 True인 경우 learning=False 변경')
         manager.FL_learning = False
+        await start_training() 
 
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
@@ -185,7 +187,7 @@ async def health_check():
             logging.error('FL_server_ST offline')
             # exit(0)
         else:
-            await health_check()
+            # await health_check()
             pass
     else:
         # await asyncio.sleep(8)
