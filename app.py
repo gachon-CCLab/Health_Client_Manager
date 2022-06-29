@@ -133,6 +133,7 @@ def async_dec(awaitable_func):
                 # print(awaitable_func.__name__, '함수 시작')
                 await awaitable_func()
                 logging.debug(str(awaitable_func.__name__) + '_함수 종료')
+                
             except Exception as e:
                 # logging.info('[E]' , awaitable_func.__name__, e)
                 logging.error('[E]' + str(awaitable_func.__name__) + str(e))
@@ -143,6 +144,7 @@ def async_dec(awaitable_func):
 
 @async_dec
 async def health_check():
+    await asyncio.sleep(2) # 잠시 대기
     global manager
     logging.info(f'초기 health_check() FL_learning: {manager.FL_learning}')
     logging.info(f'초기 health_check() FL_client_online: {manager.FL_client_online}')
@@ -155,7 +157,7 @@ async def health_check():
     
     if manager.FL_client_online == False:
         await check_flclient_online() # client online 상태 확인
-        await asyncio.sleep(2)
+        await asyncio.sleep(5)
 
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
@@ -169,7 +171,7 @@ async def health_check():
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
             
             if (manager.FL_learning == False):
-                await asyncio.sleep(40) # FL 서버 동작까지 대기
+                # await asyncio.sleep(40) # FL 서버 동작까지 대기
 
                 # client fl start check 및 실행
                 await start_training()  
@@ -191,6 +193,8 @@ async def health_check():
 
 @async_dec
 async def check_flclient_online():
+    await asyncio.sleep(2) # 잠시 대기
+
     global manager
     # logging.info('FL_client offline')
     # if (manager.FL_ready==True) and (manager.FL_learning==False):
@@ -216,6 +220,8 @@ async def check_flclient_online():
 
 @async_dec
 async def start_training():
+    await asyncio.sleep(2) # 잠시 대기
+
     global manager
     logging.info(f'start_training() FL Client Learning: {manager.FL_learning}')
     logging.info(f'start_training() FL Client Online: {manager.FL_client_online}')
@@ -240,7 +246,7 @@ async def start_training():
             # FL Server/Client 학습 종료까지 대기
             # await asyncio.sleep(14)
 
-            await asyncio.sleep(20)
+            # await asyncio.sleep(20)
             # 다시 client online/learning check
             await check_flclient_online()
 
