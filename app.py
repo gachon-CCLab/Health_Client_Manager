@@ -168,9 +168,10 @@ async def health_check():
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
 
             if (manager.FL_learning == False):
+                await asyncio.sleep(40) # FL 서버 동작까지 대기
                 # client fl start check 및 실행
                 await start_training()  
-                await asyncio.sleep(40) # FL 서버 동작까지 대기
+                
 
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
             # logging.info('flclient learning')
