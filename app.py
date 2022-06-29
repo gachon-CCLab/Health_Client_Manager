@@ -160,8 +160,8 @@ async def health_check():
 
     # FL 실행 오류 방지를 위함
     if (manager.FL_client_online == True) and (manager.FL_learning == True) and (manager.FL_ready == True):
-        await asyncio.sleep(90)
-        logging.info('90초 동안 모든 상태 True인 경우 learning=False 변경')
+        await asyncio.sleep(20)
+        logging.info('20초 동안 모든 상태 True인 경우 learning=False 변경')
         manager.FL_learning = False
         await start_training() 
 
@@ -175,7 +175,7 @@ async def health_check():
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
             
-            await asyncio.sleep(40) # FL 서버 동작까지 대기
+            await asyncio.sleep(7) # FL 서버 동작까지 대기
             # client fl start check 및 실행
             await start_training()  
 
@@ -192,7 +192,7 @@ async def health_check():
     else:
         # await asyncio.sleep(8)
         pass
-    await asyncio.sleep(12)
+    # await asyncio.sleep(12)
     return manager
 
 @async_dec
@@ -246,7 +246,7 @@ async def start_training():
             # FL Server/Client 학습 종료까지 대기
             # await asyncio.sleep(14)
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(3)
             # 다시 client online/learning check
             await check_flclient_online()
 
