@@ -190,7 +190,7 @@ async def health_check():
     else:
         # await asyncio.sleep(8)
         pass
-    # await asyncio.sleep(12)
+    await asyncio.sleep(12)
     return manager
 
 @async_dec
