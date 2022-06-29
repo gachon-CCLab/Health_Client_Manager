@@ -55,7 +55,7 @@ manager = manager_status()
 def startup():
     ##### S0 #####
     
-    # get_server_info()
+    get_server_info()
 
     # create_task를 해야 여러 코루틴을 동시에 실행
     # asyncio.create_task(pull_model())
@@ -88,7 +88,7 @@ def fin_train():
     # manager.infer_ready = True
     manager.FL_learning = False
     manager.FL_ready = False
-    manager.GL_Model_V += 1
+    # manager.GL_Model_V += 1
     return manager
 
 @app.put('/training')
@@ -133,7 +133,6 @@ def async_dec(awaitable_func):
                 # print(awaitable_func.__name__, '함수 시작')
                 await awaitable_func()
                 logging.debug(str(awaitable_func.__name__) + '_함수 종료')
-                
             except Exception as e:
                 # logging.info('[E]' , awaitable_func.__name__, e)
                 logging.error('[E]' + str(awaitable_func.__name__) + str(e))
@@ -144,7 +143,6 @@ def async_dec(awaitable_func):
 
 @async_dec
 async def health_check():
-    await asyncio.sleep(2) # 잠시 대기
     global manager
     logging.info(f'초기 health_check() FL_learning: {manager.FL_learning}')
     logging.info(f'초기 health_check() FL_client_online: {manager.FL_client_online}')
@@ -157,7 +155,7 @@ async def health_check():
     
     if manager.FL_client_online == False:
         await check_flclient_online() # client online 상태 확인
-        await asyncio.sleep(5)
+        await asyncio.sleep(2)
 
     if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
@@ -168,14 +166,13 @@ async def health_check():
             #     await pull_model()
             #     manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
-            logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
-            
-            if (manager.FL_learning == False):
-                # await asyncio.sleep(40) # FL 서버 동작까지 대기
 
+            if (manager.FL_learning == False):
                 # client fl start check 및 실행
                 await start_training()  
-            
+                await asyncio.sleep(40) # FL 서버 동작까지 대기
+
+            logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
             # logging.info('flclient learning')
             # manager.FL_learning = True
         elif (res.status_code != 200):
@@ -193,8 +190,6 @@ async def health_check():
 
 @async_dec
 async def check_flclient_online():
-    await asyncio.sleep(2) # 잠시 대기
-
     global manager
     # logging.info('FL_client offline')
     # if (manager.FL_ready==True) and (manager.FL_learning==False):
@@ -220,8 +215,6 @@ async def check_flclient_online():
 
 @async_dec
 async def start_training():
-    await asyncio.sleep(2) # 잠시 대기
-
     global manager
     logging.info(f'start_training() FL Client Learning: {manager.FL_learning}')
     logging.info(f'start_training() FL Client Online: {manager.FL_client_online}')
@@ -236,17 +229,17 @@ async def start_training():
             logging.info('flclient learning')
             manager.FL_learning = True
 
-            # Fl client 실행 오류
+            # # Fl client 실행 오류
             # if manager.FL_learning_complete == False:
+            #     manager.FL_learning = False
             #     logging.info('FL 실행 오류')
             # else:
-            #     manager.FL_learning = False
             #     logging.info('FL 실행 완료')
                 
             # FL Server/Client 학습 종료까지 대기
             # await asyncio.sleep(14)
 
-            # await asyncio.sleep(20)
+            await asyncio.sleep(60)
             # 다시 client online/learning check
             await check_flclient_online()
 
@@ -266,20 +259,20 @@ async def start_training():
     return manager
 
 
-# def get_server_info():
-#     global manager
-#     try:
-#         logging.info('get_server_info')
-#         logging.info(f'get_server_info() FL_ready: {manager.FL_ready}')
-#         res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
-#         manager.S3_key = res.json()['Server_Status']['S3_key']
-#         manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
-#         manager.s3_ready = True
-#         # manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
-#         # manager.FL_ready = res.json()['Server_Status']['FLSeReady']
-#     except Exception as e:
-#         raise e
-#     return manager
+def get_server_info():
+    global manager
+    try:
+        logging.info('get_server_info')
+        logging.info(f'get_server_info() FL_ready: {manager.FL_ready}')
+        res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
+        manager.S3_key = res.json()['Server_Status']['S3_key']
+        manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
+        manager.s3_ready = True
+        # manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
+        # manager.FL_ready = res.json()['Server_Status']['FLSeReady']
+    except Exception as e:
+        raise e
+    return manager
 
 # def get_server_info():
 #     global manager
