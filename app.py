@@ -92,9 +92,9 @@ def fin_train():
     return manager
 
 @app.put('/training')
-def fl_client_learning(cl_ma = manager_status):
+def fl_client_learning(FL_learning_complete: bool):
     global manager
-    manager = cl_ma
+    manager.FL_learning_complete = FL_learning_complete
     return manager
 
 @app.get("/trainFail")
@@ -216,8 +216,8 @@ async def check_flclient_online():
 @async_dec
 async def start_training():
     global manager
-    logging.info(f'start_training() FL Client Online: {manager.FL_client_online}')
     logging.info(f'start_training() FL Client Learning: {manager.FL_learning}')
+    logging.info(f'start_training() FL Client Online: {manager.FL_client_online}')
     logging.info(f'start_training() FL Server Status: {manager.FL_ready}')
 
     if (manager.FL_client_online == True) and (manager.FL_learning == False) and (manager.FL_ready == True):
