@@ -88,7 +88,7 @@ def fin_train():
     # manager.infer_ready = True
     manager.FL_learning = False
     manager.FL_ready = False
-    # manager.GL_Model_V += 1
+    manager.GL_Model_V += 1
     return manager
 
 @app.put('/training')
