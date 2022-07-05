@@ -200,7 +200,7 @@ async def check_flclient_online():
     else:
         pass
     
-    await asyncio.sleep(4)
+    await asyncio.sleep(6)
     return manager
 
 @async_dec
@@ -246,33 +246,6 @@ def get_server_info():
     except Exception as e:
         raise e
     return manager
-
-# def get_server_info():
-#     global manager
-#     try:
-#         res = requests.get('http://' + manager.FL_server_ST + '/FLSe/info')
-#         # print(res.json())
-#         manager.S3_key = res.json()['Server_Status']['S3_key']
-#         manager.S3_bucket = res.json()['Server_Status']['S3_bucket']
-#         manager.s3_ready = True
-#         manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
-#     except Exception as e:
-#         raise e
-#     return manager
-
-
-# async def pull_model():
-#     global manager
-#     # s3=boto3.client('s3')
-#     # s3.download_file(manager.S3_bucket, manager.S3_key, manager.S3_filename)
-#     # 예외 처리 추가 필요ㅌ
-#     loop = asyncio.get_event_loop()
-#     url = "https://" + manager.S3_bucket + ".s3.ap-northeast-2.amazonaws.com/" + manager.S3_key
-#     request = partial(wget.download, url, out=manager.S3_filename)
-#     res = await loop.run_in_executor(None, request)
-#     manager.infer_ready = True
-#     logging.debug(res)
-    # return res
 
 
 if __name__ == "__main__":
