@@ -161,7 +161,7 @@ async def health_check():
     #     manager.FL_learning = False
     #     await start_training() 
 
-    if (manager.FL_learning == False):
+    if (manager.FL_learning == False) and (manager.FL_client_online == True):
         loop = asyncio.get_event_loop()
         # raise
         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
@@ -184,8 +184,7 @@ async def health_check():
 @async_dec
 async def check_flclient_online():
     global manager
-    logging.info('FL_client offline')
-    if (manager.FL_ready==True) and (manager.FL_learning==False):
+    if (manager.FL_learning==False):
         loop = asyncio.get_event_loop()
         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_client + '/online'))
         if (res.status_code == 200) and (res.json()['FL_client_online']):
