@@ -178,7 +178,7 @@ async def health_check():
             pass
     else:
         pass
-    await asyncio.sleep(10)
+    await asyncio.sleep(15)
     return manager
 
 @async_dec
