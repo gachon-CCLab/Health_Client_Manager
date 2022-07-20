@@ -170,7 +170,6 @@ async def health_check():
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
             # logging.info('flclient learning')
             # manager.FL_learning = True
-            await asyncio.sleep(15)
         elif (res.status_code != 200):
             manager.FL_client_online = False
             logging.error('FL_server_ST offline')
@@ -179,7 +178,7 @@ async def health_check():
             pass
     else:
         pass
-    await asyncio.sleep(5)
+    await asyncio.sleep(10)
     return manager
 
 @async_dec
