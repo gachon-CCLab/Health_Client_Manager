@@ -89,7 +89,7 @@ def fin_train():
     # manager.infer_ready = True
     manager.FL_learning = False
     manager.FL_ready = False
-    manager.GL_Model_V += 1
+    # manager.GL_Model_V += 1
     return manager
 
 # @app.put('/training')
@@ -167,6 +167,8 @@ async def health_check():
         res = await loop.run_in_executor(None, requests.get, ('http://' + manager.FL_server_ST + '/FLSe/info'))
         if (res.status_code == 200) and (res.json()['Server_Status']['FLSeReady']):
             manager.FL_ready = res.json()['Server_Status']['FLSeReady']
+            manager.GL_Model_V = res.json()['Server_Status']['GL_Model_V']
+
             logging.info(f'server 상태 get 후 server_status: {manager.FL_ready}')
             # logging.info('flclient learning')
             # manager.FL_learning = True
